@@ -152,6 +152,10 @@ export class KTable<K, V> extends KStreamBase<K, V | undefined> {
     return nextKTable
   }
 
+  storage() {
+    return this._storage
+  }
+
   toStream() {
     return KStream._fromInternalStream(this._stream, {topology: this._options.topology})
   }

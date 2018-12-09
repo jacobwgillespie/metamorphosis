@@ -114,6 +114,37 @@ export class KStream<K, V> extends KStreamBase<K, V> {
     return KGroupedStream._fromInternalStream<K, V>(this._stream, this._options)
   }
 
+  join<VNext, VOther = any>(
+    table: KTable<K, VOther>,
+    joiner: (leftValue: V, rightValue: VOther) => Promise<VNext>,
+  ) {
+    const internalStream = new Stream<K, VNext>()
+    const nextStream = KStream._fromInternalStream<K, VNext>(internalStream, {...this._options})
+    this._subscribe(async message => {
+      const storage = table.storage()
+      const tableValue = storage.get(message.key)
+      if (tableValue !== undefined) {
+        await internalStream.emit({...message, value: await joiner(message.value, tableValue)})
+      }
+    })
+    return nextStream
+  }
+
+  leftJoin<VNext, VOther = any>(
+    table: KTable<K, VOther>,
+    joiner: (leftValue: V, rightValue: VOther | undefined) => Promise<VNext>,
+  ) {
+    const internalStream = new Stream<K, VNext>()
+    const nextStream = KStream._fromInternalStream<K, VNext>(internalStream, {...this._options})
+    this._subscribe(async message => {
+      await internalStream.emit({
+        ...message,
+        value: await joiner(message.value, table.storage().get(message.key)),
+      })
+    })
+    return nextStream
+  }
+
   map<KNext, VNext>(mapper: KeyValueMapper<KNext, VNext, K, V>) {
     const nextStream = new KStream<KNext, VNext>({...this._options, needsRepartition: true})
     this._subscribe(async message => nextStream._emit({...message, ...(await mapper(message))}))
