@@ -16,14 +16,14 @@
     "trailingComma": "all"
   },
   "scripts": {
-    "build": "ncc build src/index.ts -M && tsc --declaration --emitDeclarationOnly"
+    "build": "ncc build src/index.ts"
   },
   "dependencies": {
     "sinek": "^6.23.4"
   },
   "devDependencies": {
-    "@types/node": "^10.12.12",
-    "@zeit/ncc": "^0.5.1",
+    "@types/node": "^10.12.15",
+    "@zeit/ncc": "^0.7.0",
     "prettier": "^1.15.3",
     "typescript": "^3.2.2"
   }
