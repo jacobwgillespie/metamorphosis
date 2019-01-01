@@ -3,7 +3,7 @@ type Executor<T> = (
   reject: (reason?: any) => void,
 ) => void
 
-export class Deferred<T> implements Promise<T> {
+export class LazyPromise<T> implements Promise<T> {
   private _executor: Executor<T>
   private _promise: Promise<T> | null = null
 
@@ -12,9 +12,9 @@ export class Deferred<T> implements Promise<T> {
   }
 
   /**
-   * Attaches callbacks for the resolution and/or rejection of the Deferred.
-   * @param onfulfilled The callback to execute when the Deferred is resolved.
-   * @param onrejected The callback to execute when the Deferred is rejected.
+   * Attaches callbacks for the resolution and/or rejection of the LazyPromise.
+   * @param onfulfilled The callback to execute when the LazyPromise is resolved.
+   * @param onrejected The callback to execute when the LazyPromise is rejected.
    * @returns A Promise for the completion of which ever callback is executed.
    */
   then<TResult1 = T, TResult2 = never>(
@@ -26,8 +26,8 @@ export class Deferred<T> implements Promise<T> {
   }
 
   /**
-   * Attaches a callback for only the rejection of the Deferred.
-   * @param onrejected The callback to execute when the Deferred is rejected.
+   * Attaches a callback for only the rejection of the LazyPromise.
+   * @param onrejected The callback to execute when the LazyPromise is rejected.
    * @returns A Promise for the completion of the callback.
    */
   catch<TResult = never>(
@@ -37,5 +37,5 @@ export class Deferred<T> implements Promise<T> {
     return this._promise.catch(onrejected)
   }
 
-  [Symbol.toStringTag] = 'Deferred'
+  [Symbol.toStringTag] = 'LazyPromise'
 }
