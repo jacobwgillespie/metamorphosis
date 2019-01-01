@@ -39,5 +39,3 @@ export class Deferred<T> implements Promise<T> {
 
   [Symbol.toStringTag] = 'Deferred'
 }
-
-const test: number = '123'
