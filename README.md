@@ -1,4 +1,4 @@
-# metamorphosis
+# metamorphosis [![CircleCI](https://img.shields.io/circleci/project/github/jacobwgillespie/metamorphosis/master.svg)](https://circleci.com/gh/jacobwgillespie/metamorphosis)
 
 **Status:** pre-alpha
 
