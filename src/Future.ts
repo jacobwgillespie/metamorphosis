@@ -99,5 +99,5 @@ export class Future<T> implements Promise<T> {
     this._promise.resolve(value)
   }
 
-  [Symbol.toStringTag] = 'Promise' as 'Promise'
+  [Symbol.toStringTag] = 'Future'
 }
