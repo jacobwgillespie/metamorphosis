@@ -14,7 +14,7 @@
   },
   "prettier": {
     "bracketSpacing": false,
-    "parser": "babylon",
+    "parser": "typescript",
     "printWidth": 100,
     "semi": false,
     "singleQuote": true,
