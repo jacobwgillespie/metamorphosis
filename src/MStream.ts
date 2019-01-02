@@ -2,11 +2,20 @@ import {RefCountedFuture} from './RefCountedFuture'
 import {sleep} from './util'
 
 export class MStream<T> implements AsyncIterable<T> {
+  /** The number of consumers currently reading from this stream's shared iterator */
   private _consumerCount = 0
-  private _source: AsyncIterable<T>
-  private _sourceIterator: AsyncIterator<T> | null = null
+
+  /** Represents a future item to omit from this stream */
   private _itemFuture: RefCountedFuture<T>
+
+  /** The Symbol ID of the shared iterator's lead consumer */
   private _leadConsumer: Symbol | null = null
+
+  /** The source async iterable */
+  private _source: AsyncIterable<T>
+
+  /** The source async iterable's iterator, if this stream has been started */
+  private _sourceIterator: AsyncIterator<T> | null = null
 
   constructor(source: AsyncIterable<T>) {
     this._source = source
