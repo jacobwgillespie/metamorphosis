@@ -2,7 +2,6 @@ export * from './KeyValueStore'
 export * from './KStream'
 export * from './KTable'
 export * from './MStream'
-export * from './operators'
 export * from './Task'
 
 // import * as operators from './operators'
