@@ -40,6 +40,6 @@ The Log data structure provides a single structure for converting push-based dat
 
 Metamorphosis provides an `MLog` data structure to implement this transformation. It ships with several implementations:
 
-- `MMemoryLog` which stores the contents of the log in memory
-- `MFileLog` which stores the contents of the log in a set of files
-- `MKafkaLog` which uses Apache Kafka to create and manage the log (**recommended for production**)
+- `MemoryMLog` which stores the contents of the log in memory
+- `FileMLog` which stores the contents of the log in a set of files
+- `KafkaMLog` which uses Apache Kafka to create and manage the log (**recommended for production**)
