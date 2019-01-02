@@ -39,7 +39,7 @@ class RefCountedFuture {
 async function* producer() {
   console.log('starting a producer')
   let i = 0
-  while (i < 20) {
+  while (i <= 20) {
     yield i++
   }
 }
@@ -49,8 +49,16 @@ class Stream {
     this.consumers = 0
     this.producer = producer()
     this.leader = null
+    this.valueFuture = new RefCountedFuture()
 
-    this.newValueFuture()
+    const setupSelfReplacingFuture = () => {
+      this.valueFuture.then(val => {
+        this.valueFuture = new RefCountedFuture()
+        setupSelfReplacingFuture()
+        return val
+      })
+    }
+    setupSelfReplacingFuture()
   }
 
   async *consume() {
@@ -69,36 +77,25 @@ class Stream {
 
         if (this.leader === instanceID) {
           leaderNext = await this.producer.next()
-          if (!leaderNext.done) {
-            yield leaderNext.value
-            await this.valueFuture.resolve(leaderNext.value)
-          } else {
+          if (leaderNext.done) {
             return
           }
+          yield leaderNext.value
+          await this.valueFuture.resolve(leaderNext.value)
         } else {
           yield this.valueFuture.wait()
         }
       }
     } finally {
       this.consumers -= 1
-      const isLeader = this.leader === instanceID
-      if (isLeader) {
+      if (this.leader === instanceID) {
         this.leader = null
 
-        if (this.consumers > 0 && leaderNext && !leaderNext.done) {
+        if (leaderNext && !leaderNext.done) {
           await this.valueFuture.resolve(leaderNext.value)
         }
       }
     }
-  }
-
-  newValueFuture() {
-    const future = new RefCountedFuture()
-    future.then(val => {
-      this.newValueFuture()
-      return val
-    })
-    this.valueFuture = future
   }
 }
 
