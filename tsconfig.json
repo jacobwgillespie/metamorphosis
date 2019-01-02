@@ -3,7 +3,7 @@
     "noEmit": true,
     "target": "esnext",
     "module": "esnext",
-    "lib": ["es6"],
+    "lib": ["es6", "esnext.asynciterable"],
     "rootDir": "src",
     "outDir": "dist",
     "declaration": true,
