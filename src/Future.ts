@@ -1,16 +1,21 @@
 import {CustomError} from './CustomError'
 import {isError} from './util'
 
-interface FuturePromise<T> extends Promise<T> {
+interface FuturePromiseFulfill<T> {
   resolve(value: T): void
   reject(error: any): void
 }
 
+interface FuturePromise<T> extends Promise<T>, FuturePromiseFulfill<T> {}
+
 function buildFuturePromise<T>(): FuturePromise<T> {
-  const futurePromise: FuturePromise<T> = new Promise((resolve, reject) => {
-    futurePromise.resolve = resolve
-    futurePromise.reject = reject
+  const it = {} as FuturePromiseFulfill<T>
+  const futurePromise = new Promise<T>((resolve, reject) => {
+    it.resolve = resolve
+    it.reject = reject
   }) as FuturePromise<T>
+  futurePromise.resolve = it.resolve
+  futurePromise.reject = it.reject
   return futurePromise
 }
 
@@ -18,9 +23,10 @@ export class IllegalStateException extends CustomError {}
 
 export class Future<T> implements Promise<T> {
   private _completed = false
-  private _promise = buildFuturePromise<T>()
+  private _promise: FuturePromise<T>
 
   constructor() {
+    this._promise = buildFuturePromise<T>()
     this._promise
       .then(value => {
         this._completed = true
@@ -73,7 +79,7 @@ export class Future<T> implements Promise<T> {
   }
 
   completeWith(other: PromiseLike<T>) {
-    other.then(
+    return other.then(
       value => {
         this.success(value)
       },
@@ -89,6 +95,16 @@ export class Future<T> implements Promise<T> {
     }
 
     this._promise.reject(error)
+  }
+
+  /**
+   * Attaches a callback that is invoked when the Future is settled (fulfilled or rejected). The
+   * resolved value cannot be modified from the callback.
+   * @param onfinally The callback to execute when the Future is settled (fulfilled or rejected).
+   * @returns A Promise for the completion of the callback.
+   */
+  finally(onfinally?: (() => void) | undefined | null): Promise<T> {
+    return this._promise.finally(onfinally)
   }
 
   success(value: T) {
