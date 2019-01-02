@@ -14,7 +14,6 @@
   },
   "prettier": {
     "bracketSpacing": false,
-    "parser": "typescript",
     "printWidth": 100,
     "semi": false,
     "singleQuote": true,
@@ -33,7 +32,6 @@
     "bili": "^3.4.2",
     "prettier": "^1.15.3",
     "rollup": "^1.0.0",
-    "rollup-plugin-prettier": "^0.5.0",
     "rollup-plugin-typescript2": "^0.18.1",
     "typescript": "^3.2.2"
   },
@@ -46,7 +44,6 @@
       "es"
     ],
     "banner": true,
-    "target": "node:10",
-    "pretty": true
+    "target": "node:10"
   }
 }
