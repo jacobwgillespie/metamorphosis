@@ -37,5 +37,16 @@ export class LazyPromise<T> implements Promise<T> {
     return this._promise.catch(onrejected)
   }
 
+  /**
+   * Attaches a callback that is invoked when the Future is settled (fulfilled or rejected). The
+   * resolved value cannot be modified from the callback.
+   * @param onfinally The callback to execute when the Future is settled (fulfilled or rejected).
+   * @returns A Promise for the completion of the callback.
+   */
+  finally(onfinally?: (() => void) | undefined | null): Promise<T> {
+    this._promise = this._promise || new Promise(this._executor)
+    return this._promise.finally(onfinally)
+  }
+
   [Symbol.toStringTag] = 'LazyPromise'
 }
