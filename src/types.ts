@@ -27,3 +27,5 @@ export interface KeyValueMapper<KNext, VNext, K, V> {
 export interface FlatKeyValueMapper<KNext, VNext, K, V> {
   (message: Message<K, V>): Promise<Message<KNext, VNext>[]>
 }
+
+export type StreamOperator<T, R> = (source: AsyncIterable<T>) => AsyncIterable<R>
