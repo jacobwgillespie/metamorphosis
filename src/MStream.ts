@@ -11,6 +11,26 @@ export class TimeoutError extends CustomError {
   }
 }
 
+export interface NextObserver<T> {
+  next: (value: T) => void | Promise<void>
+  error?: (err: any) => void | Promise<void>
+  complete?: () => void | Promise<void>
+}
+
+export interface ErrorObserver<T> {
+  next?: (value: T) => void | Promise<void>
+  error: (err: any) => void | Promise<void>
+  complete?: () => void | Promise<void>
+}
+
+export interface CompletionObserver<T> {
+  next?: (value: T) => void | Promise<void>
+  error?: (err: any) => void | Promise<void>
+  complete: () => void | Promise<void>
+}
+
+export type Observer<T> = NextObserver<T> | ErrorObserver<T> | CompletionObserver<T>
+
 export class MStream<T> implements AsyncIterable<T> {
   /** The number of consumers currently reading from this stream's shared iterator */
   private _consumerCount = 0
@@ -94,6 +114,33 @@ export class MStream<T> implements AsyncIterable<T> {
     )
   }
 
+  endWith(...items: T[]): EndWithMStream<T> {
+    const source = this.iterator()
+    return new EndWithMStream(
+      (async function*() {
+        yield* source
+        for (const item of items) {
+          yield item
+        }
+      })(),
+    )
+  }
+
+  async every<S extends T>(predicate: (value: T, index: number) => value is S): Promise<boolean>
+  async every(predicate: (value: T, index: number) => boolean | Promise<boolean>): Promise<boolean>
+  async every(
+    predicate: (value: T, index: number) => boolean | Promise<boolean>,
+  ): Promise<boolean> {
+    const source = this.iterator()
+    let i = 0
+    for await (const item of source) {
+      if (!(await predicate(item, i++))) {
+        return false
+      }
+    }
+    return true
+  }
+
   filter<S extends T>(predicate: (value: T, index: number) => value is S): FilterMStream<T>
   filter(predicate: (value: T, index: number) => boolean | Promise<boolean>): FilterMStream<T>
   filter(predicate: (value: T, index: number) => boolean | Promise<boolean>): FilterMStream<T> {
@@ -105,6 +152,19 @@ export class MStream<T> implements AsyncIterable<T> {
           if (await predicate(item, i++)) {
             yield item
           }
+        }
+      })(),
+    )
+  }
+
+  finally(action: () => void | Promise<void>): FinallyMStream<T> {
+    const source = this.iterator()
+    return new FinallyMStream(
+      (async function*() {
+        try {
+          yield* source
+        } finally {
+          await action()
         }
       })(),
     )
@@ -289,6 +349,38 @@ export class MStream<T> implements AsyncIterable<T> {
     )
   }
 
+  tap(observer: Observer<T>): TapMStream<T> {
+    const source = this.iterator()
+    return new TapMStream(
+      (async function*() {
+        while (true) {
+          let next
+          try {
+            next = await source.next()
+          } catch (err) {
+            if (observer.error) {
+              await observer.error(err)
+            }
+            throw err
+          }
+
+          if (next.done) {
+            if (observer.complete) {
+              await observer.complete()
+            }
+            break
+          }
+
+          if (observer.next) {
+            await observer.next(next.value)
+          }
+
+          yield next.value
+        }
+      })(),
+    )
+  }
+
   throttle(time: number) {
     const source = this.iterator()
     return new ThrottleMStream(
@@ -345,12 +437,20 @@ export class DelayMStream<T> extends MStream<T> {
   [Symbol.toStringTag] = 'DelayMStream'
 }
 
+export class EndWithMStream<T> extends MStream<T> {
+  [Symbol.toStringTag] = 'EndWithMStream'
+}
+
 export class FilterMStream<T> extends MStream<T> {
   [Symbol.toStringTag] = 'FilterMStream'
 }
 
 export class FlatMapMStream<T> extends MStream<T> {
   [Symbol.toStringTag] = 'FlatMapMStream'
+}
+
+export class FinallyMStream<T> extends MStream<T> {
+  [Symbol.toStringTag] = 'FinallyMStream'
 }
 
 export class MapMStream<T> extends MStream<T> {
@@ -379,6 +479,10 @@ export class TakeLastMStream<T> extends MStream<T> {
 
 export class TakeWhileMStream<T> extends MStream<T> {
   [Symbol.toStringTag] = 'TakeWhileMStream'
+}
+
+export class TapMStream<T> extends MStream<T> {
+  [Symbol.toStringTag] = 'TapMStream'
 }
 
 export class ThrottleMStream<T> extends MStream<T> {
