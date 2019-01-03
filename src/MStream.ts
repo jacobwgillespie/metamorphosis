@@ -85,7 +85,7 @@ export class MStream<T> implements AsyncIterable<T> {
   }
 
   delay(timeMs: number) {
-    const source = this[Symbol.asyncIterator]()
+    const source = this.iterator()
     return new DelayMStream(
       (async function*() {
         await sleep(timeMs)
@@ -97,7 +97,7 @@ export class MStream<T> implements AsyncIterable<T> {
   filter<S extends T>(predicate: (value: T, index: number) => value is S): FilterMStream<T>
   filter(predicate: (value: T, index: number) => boolean | Promise<boolean>): FilterMStream<T>
   filter(predicate: (value: T, index: number) => boolean | Promise<boolean>): FilterMStream<T> {
-    const source = this[Symbol.asyncIterator]()
+    const source = this.iterator()
     return new FilterMStream(
       (async function*() {
         let i = 0
@@ -113,7 +113,7 @@ export class MStream<T> implements AsyncIterable<T> {
   flatMap<TResult>(
     selector: (value: T, index: number) => AsyncIterable<TResult> | Promise<AsyncIterable<TResult>>,
   ) {
-    const source = this[Symbol.asyncIterator]()
+    const source = this.iterator()
     return new FlatMapMStream(
       (async function*() {
         let i = 0
@@ -125,6 +125,10 @@ export class MStream<T> implements AsyncIterable<T> {
         }
       })(),
     )
+  }
+
+  iterator(): AsyncIterableIterator<T> {
+    return this[Symbol.asyncIterator]()
   }
 
   async last<S extends T>(
@@ -149,7 +153,7 @@ export class MStream<T> implements AsyncIterable<T> {
   }
 
   map<TResult>(selector: (value: T, index: number) => Promise<TResult> | TResult) {
-    const source = this[Symbol.asyncIterator]()
+    const source = this.iterator()
     return new MapMStream(
       (async function*() {
         let i = 0
@@ -162,7 +166,7 @@ export class MStream<T> implements AsyncIterable<T> {
   }
 
   skip(count: number) {
-    const source = this[Symbol.asyncIterator]()
+    const source = this.iterator()
     return new SkipMStream(
       (async function*() {
         const it = source[Symbol.asyncIterator]()
@@ -183,7 +187,7 @@ export class MStream<T> implements AsyncIterable<T> {
   }
 
   skipLast(count: number) {
-    const source = this[Symbol.asyncIterator]()
+    const source = this.iterator()
     return new SkipLastMStream(
       (async function*() {
         const items: T[] = []
@@ -199,7 +203,7 @@ export class MStream<T> implements AsyncIterable<T> {
   }
 
   skipWhile(predicate: (value: T, index: number) => boolean | Promise<boolean>) {
-    const source = this[Symbol.asyncIterator]()
+    const source = this.iterator()
     return new SkipWhileMStream(
       (async function*() {
         let skipping = true
@@ -221,7 +225,7 @@ export class MStream<T> implements AsyncIterable<T> {
   async some<S extends T>(predicate: (value: T, index: number) => value is S): Promise<boolean>
   async some(predicate: (value: T, index: number) => boolean | Promise<boolean>): Promise<boolean>
   async some(predicate: (value: T, index: number) => boolean | Promise<boolean>): Promise<boolean> {
-    const source = this[Symbol.asyncIterator]()
+    const source = this.iterator()
     let i = 0
     for await (const item of source) {
       if (await predicate(item, i++)) {
@@ -232,7 +236,7 @@ export class MStream<T> implements AsyncIterable<T> {
   }
 
   take(count: number) {
-    const source = this[Symbol.asyncIterator]()
+    const source = this.iterator()
     return new TakeMStream(
       (async function*() {
         let i = count
@@ -250,7 +254,7 @@ export class MStream<T> implements AsyncIterable<T> {
   }
 
   takeLast(count: number) {
-    const source = this[Symbol.asyncIterator]()
+    const source = this.iterator()
     return new TakeLastMStream(
       (async function*() {
         if (count > 0) {
@@ -270,7 +274,7 @@ export class MStream<T> implements AsyncIterable<T> {
   }
 
   takeWhile(predicate: (value: T, index: number) => boolean | Promise<boolean>) {
-    const source = this[Symbol.asyncIterator]()
+    const source = this.iterator()
     return new TakeWhileMStream(
       (async function*() {
         let i = 0
@@ -286,7 +290,7 @@ export class MStream<T> implements AsyncIterable<T> {
   }
 
   throttle(time: number) {
-    const source = this[Symbol.asyncIterator]()
+    const source = this.iterator()
     return new ThrottleMStream(
       (async function*() {
         let currentTime, previousTime
@@ -303,7 +307,7 @@ export class MStream<T> implements AsyncIterable<T> {
   }
 
   timeout(time: number) {
-    const source = this[Symbol.asyncIterator]()
+    const source = this.iterator()
     return new TimeoutMStream(
       (async function*() {
         while (true) {
