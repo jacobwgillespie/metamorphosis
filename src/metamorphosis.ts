@@ -1,6 +1,5 @@
 export * from './errors'
 export * from './Future'
-export * from './LazyPromise'
 export * from './MStream'
 export * from './RefCountedFuture'
 export * from './Task'
@@ -17,15 +16,7 @@ export async function* test() {
 }
 
 async function run() {
-  console.log('starting')
-
   const it = new MStream(test()).map(i => i * 2)
-
-  // operators.pipe(
-  //   test(),
-  //   operators.map(i => i),
-  //   operators.skipLast(5),
-  // )
 
   for await (const item of it) {
     console.log(item)
