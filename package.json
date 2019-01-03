@@ -24,9 +24,7 @@
     "test": "tsc",
     "watch": "bili --watch"
   },
-  "dependencies": {
-    "sinek": "^6.23.4"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "^10.12.18",
     "bili": "^3.4.2",
