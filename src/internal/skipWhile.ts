@@ -1,4 +1,4 @@
-async function* skipWhile<T>(
+export async function* skipWhile<T>(
   source: AsyncIterable<T>,
   predicate: (value: T, index: number) => boolean | Promise<boolean>,
 ) {
