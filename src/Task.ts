@@ -2,16 +2,16 @@ import {Future} from './Future'
 
 const neverPromise = new Promise<never>(() => undefined)
 
-async function runGeneratorToPromise<T>(generator: AsyncIterableIterator<T>) {
-  let next = await generator.next()
+async function runIteratorToPromise<T>(source: AsyncIterator<T>) {
+  let next = await source.next()
   let last
 
   while (!next.done) {
     last = next
-    next = await generator.next(next.value)
+    next = await source.next(next.value)
   }
 
-  // If the generator never generates a value, return a never promise
+  // If the source never generates a value, return a never promise
   if (!last) {
     return neverPromise as Promise<T>
   }
@@ -24,17 +24,19 @@ function identity<T>(val: T) {
 }
 
 export class Task<T> implements Promise<T> {
-  private _executor: AsyncIterableIterator<T>
+  // private _executor: AsyncIterable<T>
+  private _executorIterator: AsyncIterator<T>
   private _future: Future<T>
   private _done = false
 
-  constructor(executor: AsyncIterableIterator<T>) {
-    this._executor = executor
+  constructor(executor: AsyncIterable<T>) {
+    // this._executor = executor
+    this._executorIterator = executor[Symbol.asyncIterator]()
     this._future = new Future()
   }
 
   runAsync() {
-    runGeneratorToPromise(this._executor)
+    runIteratorToPromise(this._executorIterator)
       .then(val => {
         if (!this._done) {
           this._done = true
@@ -87,7 +89,9 @@ export class Task<T> implements Promise<T> {
 
   cancel() {
     this._done = true
-    this._executor.return!()
+    if (this._executorIterator.return) {
+      this._executorIterator.return()
+    }
     this._future.failure(new Error('cancelled'))
   }
 
