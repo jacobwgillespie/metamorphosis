@@ -24,11 +24,17 @@
       "installation": {
         "title": "Installation"
       },
-      "MStream": {
+      "mlog": {
+        "title": "MLog"
+      },
+      "mstream": {
         "title": "MStream"
       },
       "philosophy": {
         "title": "Philosophy"
+      },
+      "task": {
+        "title": "Task"
       },
       "what-is-metamorphosis": {
         "title": "What is Metamorphosis?"

@@ -1,5 +1,5 @@
 ---
-id: MLog
+id: mlog
 title: MLog
 ---
 

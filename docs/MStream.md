@@ -1,5 +1,5 @@
 ---
-id: MStream
+id: mstream
 title: MStream
 ---
 

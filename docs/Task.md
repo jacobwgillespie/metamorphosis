@@ -1,5 +1,5 @@
 ---
-id: Task
+id: task
 title: Task
 ---
 
