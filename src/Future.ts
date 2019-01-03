@@ -1,5 +1,5 @@
-import {CustomError} from './CustomError'
-import {isError} from './util'
+import {IllegalStateException} from './errors'
+import {isError} from './internal/_utils'
 
 interface FuturePromiseFulfill<T> {
   resolve(value: T): void
@@ -18,8 +18,6 @@ function buildFuturePromise<T>(): FuturePromise<T> {
   futurePromise.reject = it.reject
   return futurePromise
 }
-
-export class IllegalStateException extends CustomError {}
 
 export class Future<T> implements Promise<T> {
   private _completed = false

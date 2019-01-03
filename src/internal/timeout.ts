@@ -1,4 +1,4 @@
-import {sleep} from '../util'
+import {sleep} from './_utils'
 import {TimeoutError} from '../errors'
 
 type TimeoutResult<TSource> = [false, IteratorResult<TSource>] | [true]

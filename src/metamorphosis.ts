@@ -1,12 +1,13 @@
-export * from './KeyValueStore'
-export * from './KStream'
-export * from './KTable'
+export * from './errors'
+export * from './Future'
+export * from './LazyPromise'
 export * from './MStream'
+export * from './RefCountedFuture'
 export * from './Task'
+export * from './types'
 
-// import * as operators from './operators'
-import {sleep} from './util'
 import {MStream} from './MStream'
+import {sleep} from './internal/_utils'
 
 export async function* test() {
   for (let i = 0; i < 20; i++) {
