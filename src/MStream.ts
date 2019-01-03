@@ -1,35 +1,23 @@
+import {delay} from './internal/delay'
+import {endWith} from './internal/endWith'
+import {every} from './internal/every'
+import {filter} from './internal/filter'
+import {finallyDo} from './internal/finally'
+import {flatMap} from './internal/flatMap'
+import {last} from './internal/last'
+import {map} from './internal/map'
+import {skip} from './internal/skip'
+import {skipLast} from './internal/skipLast'
+import {some} from './internal/some'
+import {take} from './internal/take'
+import {takeLast} from './internal/takeLast'
+import {takeWhile} from './internal/takeWhile'
+import {tap} from './internal/tap'
+import {throttle} from './internal/throttle'
+import {timeout} from './internal/timeout'
+import {toArray} from './internal/toArray'
 import {RefCountedFuture} from './RefCountedFuture'
-import {sleep} from './util'
-import {CustomError} from './CustomError'
-
-type TimeoutResult<TSource> = [false, IteratorResult<TSource>] | [true]
-
-export class TimeoutError extends CustomError {
-  constructor() {
-    super()
-    this.message = 'Stream timeout'
-  }
-}
-
-export interface NextObserver<T> {
-  next: (value: T) => void | Promise<void>
-  error?: (err: any) => void | Promise<void>
-  complete?: () => void | Promise<void>
-}
-
-export interface ErrorObserver<T> {
-  next?: (value: T) => void | Promise<void>
-  error: (err: any) => void | Promise<void>
-  complete?: () => void | Promise<void>
-}
-
-export interface CompletionObserver<T> {
-  next?: (value: T) => void | Promise<void>
-  error?: (err: any) => void | Promise<void>
-  complete: () => void | Promise<void>
-}
-
-export type Observer<T> = NextObserver<T> | ErrorObserver<T> | CompletionObserver<T>
+import {Observer} from './types'
 
 export class MStream<T> implements AsyncIterable<T> {
   /** The number of consumers currently reading from this stream's shared iterator */
@@ -104,26 +92,12 @@ export class MStream<T> implements AsyncIterable<T> {
     }
   }
 
-  delay(timeMs: number) {
-    const source = this.iterator()
-    return new DelayMStream(
-      (async function*() {
-        await sleep(timeMs)
-        yield* source
-      })(),
-    )
+  delay(delayMs: number): DelayMStream<T> {
+    return new DelayMStream(delay(this, delayMs))
   }
 
   endWith(...items: T[]): EndWithMStream<T> {
-    const source = this.iterator()
-    return new EndWithMStream(
-      (async function*() {
-        yield* source
-        for (const item of items) {
-          yield item
-        }
-      })(),
-    )
+    return new EndWithMStream(endWith(this, ...items))
   }
 
   async every<S extends T>(predicate: (value: T, index: number) => value is S): Promise<boolean>
@@ -131,60 +105,23 @@ export class MStream<T> implements AsyncIterable<T> {
   async every(
     predicate: (value: T, index: number) => boolean | Promise<boolean>,
   ): Promise<boolean> {
-    const source = this.iterator()
-    let i = 0
-    for await (const item of source) {
-      if (!(await predicate(item, i++))) {
-        return false
-      }
-    }
-    return true
+    return every(this, predicate)
   }
 
-  filter<S extends T>(predicate: (value: T, index: number) => value is S): FilterMStream<T>
+  filter<S extends T>(predicate: (value: T, index: number) => value is S): FilterMStream<S>
   filter(predicate: (value: T, index: number) => boolean | Promise<boolean>): FilterMStream<T>
   filter(predicate: (value: T, index: number) => boolean | Promise<boolean>): FilterMStream<T> {
-    const source = this.iterator()
-    return new FilterMStream(
-      (async function*() {
-        let i = 0
-        for await (const item of source) {
-          if (await predicate(item, i++)) {
-            yield item
-          }
-        }
-      })(),
-    )
+    return new FilterMStream(filter(this, predicate))
   }
 
   finally(action: () => void | Promise<void>): FinallyMStream<T> {
-    const source = this.iterator()
-    return new FinallyMStream(
-      (async function*() {
-        try {
-          yield* source
-        } finally {
-          await action()
-        }
-      })(),
-    )
+    return new FinallyMStream(finallyDo(this, action))
   }
 
   flatMap<TResult>(
     selector: (value: T, index: number) => AsyncIterable<TResult> | Promise<AsyncIterable<TResult>>,
-  ) {
-    const source = this.iterator()
-    return new FlatMapMStream(
-      (async function*() {
-        let i = 0
-        for await (const outerItem of source) {
-          const innerSource = await selector(outerItem, i++)
-          for await (const innerItem of innerSource) {
-            yield innerItem
-          }
-        }
-      })(),
-    )
+  ): FlatMapMStream<TResult> {
+    return new FlatMapMStream(flatMap(this, selector))
   }
 
   iterator(): AsyncIterableIterator<T> {
@@ -200,234 +137,63 @@ export class MStream<T> implements AsyncIterable<T> {
   async last(
     predicate: (value: T, index: number) => boolean | Promise<boolean> = async () => true,
   ): Promise<T | undefined> {
-    let i = 0
-    let last: T | undefined
-
-    for await (let item of this) {
-      if (await predicate(item, i++)) {
-        last = item
-      }
-    }
-
-    return last
+    return last(this, predicate)
   }
 
-  map<TResult>(selector: (value: T, index: number) => Promise<TResult> | TResult) {
-    const source = this.iterator()
-    return new MapMStream(
-      (async function*() {
-        let i = 0
-        for await (const item of source) {
-          const result = await selector(item, i)
-          yield result
-        }
-      })(),
-    )
+  map<TResult>(
+    selector: (value: T, index: number) => Promise<TResult> | TResult,
+  ): MapMStream<TResult> {
+    return new MapMStream(map(this, selector))
   }
 
-  skip(count: number) {
-    const source = this.iterator()
-    return new SkipMStream(
-      (async function*() {
-        const it = source[Symbol.asyncIterator]()
-        let i = count
-
-        while (i > 0 && !(await it.next()).done) {
-          i--
-        }
-
-        if (i <= 0) {
-          let next
-          while (!(next = await it.next()).done) {
-            yield next.value
-          }
-        }
-      })(),
-    )
+  skip(count: number): SkipMStream<T> {
+    return new SkipMStream(skip(this, count))
   }
 
-  skipLast(count: number) {
-    const source = this.iterator()
-    return new SkipLastMStream(
-      (async function*() {
-        const items: T[] = []
-
-        for await (const item of source) {
-          items.push(item)
-          if (items.length > count) {
-            yield items.shift()!
-          }
-        }
-      })(),
-    )
+  skipLast(count: number): SkipLastMStream<T> {
+    return new SkipLastMStream(skipLast(this, count))
   }
 
-  skipWhile(predicate: (value: T, index: number) => boolean | Promise<boolean>) {
-    const source = this.iterator()
-    return new SkipWhileMStream(
-      (async function*() {
-        let skipping = true
-        let i = 0
-
-        for await (const item of source) {
-          if (skipping && !(await predicate(item, i++))) {
-            skipping = false
-          }
-
-          if (!skipping) {
-            yield item
-          }
-        }
-      })(),
-    )
+  skipWhile(
+    predicate: (value: T, index: number) => boolean | Promise<boolean>,
+  ): SkipWhileMStream<T> {
+    return new SkipWhileMStream(skipWhile(this, predicate))
   }
 
   async some<S extends T>(predicate: (value: T, index: number) => value is S): Promise<boolean>
   async some(predicate: (value: T, index: number) => boolean | Promise<boolean>): Promise<boolean>
   async some(predicate: (value: T, index: number) => boolean | Promise<boolean>): Promise<boolean> {
-    const source = this.iterator()
-    let i = 0
-    for await (const item of source) {
-      if (await predicate(item, i++)) {
-        return true
-      }
-    }
-    return false
+    return some(this, predicate)
   }
 
-  take(count: number) {
-    const source = this.iterator()
-    return new TakeMStream(
-      (async function*() {
-        let i = count
-        if (i > 0) {
-          for await (let item of source) {
-            yield item
-            i -= 1
-            if (i === 0) {
-              break
-            }
-          }
-        }
-      })(),
-    )
+  take(count: number): TakeMStream<T> {
+    return new TakeMStream(take(this, count))
   }
 
-  takeLast(count: number) {
-    const source = this.iterator()
-    return new TakeLastMStream(
-      (async function*() {
-        if (count > 0) {
-          const items: T[] = []
-          for await (let item of source) {
-            if (items.length >= count) {
-              items.shift()
-            }
-
-            items.push(item)
-          }
-
-          yield* items
-        }
-      })(),
-    )
+  takeLast(count: number): TakeLastMStream<T> {
+    return new TakeLastMStream(takeLast(this, count))
   }
 
-  takeWhile(predicate: (value: T, index: number) => boolean | Promise<boolean>) {
-    const source = this.iterator()
-    return new TakeWhileMStream(
-      (async function*() {
-        let i = 0
-
-        for await (const item of source) {
-          if (!(await predicate(item, i++))) {
-            break
-          }
-          yield item
-        }
-      })(),
-    )
+  takeWhile(
+    predicate: (value: T, index: number) => boolean | Promise<boolean>,
+  ): TakeWhileMStream<T> {
+    return new TakeWhileMStream(takeWhile(this, predicate))
   }
 
   tap(observer: Observer<T>): TapMStream<T> {
-    const source = this.iterator()
-    return new TapMStream(
-      (async function*() {
-        while (true) {
-          let next
-          try {
-            next = await source.next()
-          } catch (err) {
-            if (observer.error) {
-              await observer.error(err)
-            }
-            throw err
-          }
-
-          if (next.done) {
-            if (observer.complete) {
-              await observer.complete()
-            }
-            break
-          }
-
-          if (observer.next) {
-            await observer.next(next.value)
-          }
-
-          yield next.value
-        }
-      })(),
-    )
+    return new TapMStream(tap(this, observer))
   }
 
-  throttle(time: number) {
-    const source = this.iterator()
-    return new ThrottleMStream(
-      (async function*() {
-        let currentTime, previousTime
-
-        for await (const item of source) {
-          currentTime = Date.now()
-          if (!previousTime || currentTime - previousTime > time) {
-            previousTime = currentTime
-            yield item
-          }
-        }
-      })(),
-    )
+  throttle(time: number): ThrottleMStream<T> {
+    return new ThrottleMStream(throttle(this, time))
   }
 
-  timeout(time: number) {
-    const source = this.iterator()
-    return new TimeoutMStream(
-      (async function*() {
-        while (true) {
-          const [err, item] = await Promise.race([
-            source.next().then(item => [false, item] as TimeoutResult<T>),
-            sleep(time).then(() => [true] as TimeoutResult<T>),
-          ])
-
-          if (err) {
-            throw new TimeoutError()
-          }
-
-          if (!item || item.done) {
-            break
-          }
-
-          yield item.value
-        }
-      })(),
-    )
+  timeout(time: number): TimeoutMStream<T> {
+    return new TimeoutMStream(timeout(this, time))
   }
 
-  async toArray() {
-    let results = [] as T[]
-    for await (let item of this) {
-      results.push(item)
-    }
-    return results
+  async toArray(): Promise<T[]> {
+    return toArray(this)
   }
 
   [Symbol.toStringTag] = 'MStream'

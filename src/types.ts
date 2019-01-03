@@ -29,3 +29,25 @@ export interface FlatKeyValueMapper<KNext, VNext, K, V> {
 }
 
 export type StreamOperator<T, R> = (source: AsyncIterable<T>) => AsyncIterable<R>
+
+// new stuff
+
+export interface NextObserver<T> {
+  next: (value: T) => void | Promise<void>
+  error?: (err: any) => void | Promise<void>
+  complete?: () => void | Promise<void>
+}
+
+export interface ErrorObserver<T> {
+  next?: (value: T) => void | Promise<void>
+  error: (err: any) => void | Promise<void>
+  complete?: () => void | Promise<void>
+}
+
+export interface CompletionObserver<T> {
+  next?: (value: T) => void | Promise<void>
+  error?: (err: any) => void | Promise<void>
+  complete: () => void | Promise<void>
+}
+
+export type Observer<T> = NextObserver<T> | ErrorObserver<T> | CompletionObserver<T>
