@@ -21,7 +21,6 @@
   },
   "scripts": {
     "build": "bili",
-    "build:dts": "dts-bundle-generator -o dist/metamorphosis.d.ts src/metamorphosis.ts",
     "test": "tsc",
     "watch": "bili --watch"
   },
@@ -31,7 +30,6 @@
   "devDependencies": {
     "@types/node": "^10.12.18",
     "bili": "^3.4.2",
-    "dts-bundle-generator": "^2.0.0",
     "prettier": "^1.15.3",
     "rollup": "^1.0.0",
     "rollup-plugin-typescript2": "^0.18.1",
