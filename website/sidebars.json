@@ -1,9 +1,7 @@
 {
   "docs": {
-    "Docusaurus": ["doc1"],
-    "Philosophy": ["philosophy"],
-    "First Category": ["doc2"],
-    "Second Category": ["doc3"]
+    "Introduction": ["what-is-metamorphosis", "installation", "philosophy"],
+    "API": ["MStream", "MLog", "Task"]
   },
   "docs-other": {
     "First Category": ["doc4", "doc5"]

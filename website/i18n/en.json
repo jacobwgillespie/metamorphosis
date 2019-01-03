@@ -20,18 +20,28 @@
       },
       "doc5": {
         "title": "Fifth Document"
+      },
+      "installation": {
+        "title": "Installation"
+      },
+      "MStream": {
+        "title": "MStream"
+      },
+      "philosophy": {
+        "title": "Philosophy"
+      },
+      "what-is-metamorphosis": {
+        "title": "What is Metamorphosis?"
       }
     },
     "links": {
       "Docs": "Docs",
-      "API": "API",
-      "Help": "Help",
-      "Blog": "Blog"
+      "GitHub": "GitHub"
     },
     "categories": {
-      "Docusaurus": "Docusaurus",
-      "First Category": "First Category",
-      "Second Category": "Second Category"
+      "Introduction": "Introduction",
+      "API": "API",
+      "First Category": "First Category"
     }
   },
   "pages-strings": {
