@@ -27,6 +27,7 @@ import {timeout} from './internal/timeout'
 import {toArray} from './internal/toArray'
 import {RefCountedFuture} from './RefCountedFuture'
 import {Observer} from './types'
+import {of} from './internal/of'
 
 export class MStream<T> implements AsyncIterable<T> {
   /** The number of consumers currently reading from this stream's shared iterator */
@@ -43,6 +44,10 @@ export class MStream<T> implements AsyncIterable<T> {
 
   /** The source async iterable's iterator, if this stream has been started */
   private _sourceIterator: AsyncIterator<T> | null = null
+
+  static of<T>(...items: T[]) {
+    return new OfMStream(of(...items))
+  }
 
   constructor(source: AsyncIterable<T>) {
     this._source = source
@@ -303,6 +308,10 @@ export class FinallyMStream<T> extends MStream<T> {
 
 export class MapMStream<T> extends MStream<T> {
   [Symbol.toStringTag] = 'MapMStream'
+}
+
+export class OfMStream<T> extends MStream<T> {
+  [Symbol.toStringTag] = 'OfMStream'
 }
 
 export class SkipMStream<T> extends MStream<T> {
