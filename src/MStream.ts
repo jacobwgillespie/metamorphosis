@@ -6,7 +6,7 @@ import {elementAt} from './internal/elementAt'
 import {endWith} from './internal/endWith'
 import {every} from './internal/every'
 import {filter} from './internal/filter'
-import {finallyDo} from './internal/finally'
+import {finallyFn} from './internal/finally'
 import {find} from './internal/find'
 import {findIndex} from './internal/findIndex'
 import {first} from './internal/first'
@@ -32,6 +32,8 @@ import {timeout} from './internal/timeout'
 import {toArray} from './internal/toArray'
 import {RefCountedFuture} from './RefCountedFuture'
 import {Observer} from './types'
+import {throwFn} from './internal/throw'
+import {startWith} from './internal/startWith'
 
 export class MStream<T> implements AsyncIterable<T> {
   static fromArray<T>(array: ArrayLike<T>): FromArrayMStream<T> {
@@ -165,7 +167,7 @@ export class MStream<T> implements AsyncIterable<T> {
   }
 
   finally(action: () => void | Promise<void>): FinallyMStream<T> {
-    return new FinallyMStream(finallyDo(this, action))
+    return new FinallyMStream(finallyFn(this, action))
   }
 
   async find<S extends T>(
@@ -268,6 +270,10 @@ export class MStream<T> implements AsyncIterable<T> {
     return some(this, predicate)
   }
 
+  startWith(...items: T[]): StartWithMStream<T> {
+    return new StartWithMStream(startWith(this, ...items))
+  }
+
   take(count: number): TakeMStream<T> {
     return new TakeMStream(take(this, count))
   }
@@ -288,6 +294,10 @@ export class MStream<T> implements AsyncIterable<T> {
 
   throttle(time: number): ThrottleMStream<T> {
     return new ThrottleMStream(throttle(this, time))
+  }
+
+  throw(error: any): ThrowMStream<T> {
+    return new ThrowMStream(throwFn<T>(error))
   }
 
   timeout(time: number): TimeoutMStream<T> {
@@ -369,6 +379,10 @@ export class ScanMStream<T> extends MStream<T> {
   [Symbol.toStringTag] = 'ScanMStream'
 }
 
+export class StartWithMStream<T> extends MStream<T> {
+  [Symbol.toStringTag] = 'StartWithMStream'
+}
+
 export class TakeMStream<T> extends MStream<T> {
   [Symbol.toStringTag] = 'TakeMStream'
 }
@@ -387,6 +401,10 @@ export class TapMStream<T> extends MStream<T> {
 
 export class ThrottleMStream<T> extends MStream<T> {
   [Symbol.toStringTag] = 'ThrottleMStream'
+}
+
+export class ThrowMStream<T> extends MStream<T> {
+  [Symbol.toStringTag] = 'ThrowMStream'
 }
 
 export class TimeoutMStream<T> extends MStream<T> {
