@@ -21,6 +21,7 @@ export class MetamorphosisError extends Error {
       return
     }
 
+    /* istanbul ignore next */
     Object.defineProperty(this, 'stack', {
       configurable: true,
       enumerable: false,
