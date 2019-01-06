@@ -1,5 +1,6 @@
 import {tap} from '../tap'
 import {toArray} from '../toArray'
+import {Observer} from '../../types'
 
 test('tap', async () => {
   const source = (async function*() {
@@ -35,4 +36,32 @@ test('tap', async () => {
   expect(failingObserver.next.mock.calls).toEqual([[1], [2]])
   expect(failingObserver.complete.mock.calls.length).toBe(0)
   expect(failingObserver.error.mock.calls.length).toBe(1)
+
+  const source2 = (async function*() {
+    yield 1
+    yield 2
+    yield 3
+  })()
+
+  const emptyObserver = ({
+    get next() {
+      return undefined
+    },
+    get error() {
+      return undefined
+    },
+    get complete() {
+      return undefined
+    },
+  } as unknown) as Observer<number>
+
+  const nextSpy = jest.spyOn(emptyObserver, 'next', 'get')
+  const errorSpy = jest.spyOn(emptyObserver, 'error', 'get')
+  const completeSpy = jest.spyOn(emptyObserver, 'complete', 'get')
+
+  await toArray(tap(source2, emptyObserver))
+
+  expect(nextSpy).toHaveBeenCalledTimes(3)
+  expect(completeSpy).toHaveBeenCalledTimes(1)
+  expect(errorSpy).toHaveBeenCalledTimes(0)
 })
