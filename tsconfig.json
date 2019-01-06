@@ -1,11 +1,10 @@
 {
+  "include": ["./src/**/*.ts"],
   "compilerOptions": {
     "noEmit": true,
     "target": "esnext",
     "module": "esnext",
     "lib": ["es6", "esnext"],
-    "rootDir": "src",
-    "outDir": "dist",
     "declaration": true,
     "strict": true,
     "noUnusedLocals": true,

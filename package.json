@@ -21,16 +21,20 @@
   },
   "scripts": {
     "build": "bili",
-    "test": "tsc",
+    "test": "jest",
+    "type-check": "tsc",
     "watch": "bili --watch"
   },
   "dependencies": {},
   "devDependencies": {
+    "@types/jest": "^23.3.11",
     "@types/node": "^10.12.18",
     "bili": "^3.4.2",
+    "jest": "^23.6.0",
     "prettier": "^1.15.3",
     "rollup": "^1.0.0",
     "rollup-plugin-typescript2": "^0.18.1",
+    "ts-jest": "^23.10.5",
     "typescript": "^3.2.2"
   },
   "bili": {
