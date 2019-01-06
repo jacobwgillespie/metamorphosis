@@ -34,6 +34,7 @@ import {RefCountedFuture} from './RefCountedFuture'
 import {Observer} from './types'
 import {throwFn} from './internal/throw'
 import {startWith} from './internal/startWith'
+import {partition} from './internal/partition'
 
 export class MStream<T> implements AsyncIterable<T> {
   static fromArray<T>(array: ArrayLike<T>): FromArrayMStream<T> {
@@ -228,6 +229,19 @@ export class MStream<T> implements AsyncIterable<T> {
     return new MapMStream(map(this, selector))
   }
 
+  partition<S extends T>(
+    predicate: (item: T, index: number) => item is S,
+  ): [PartitionMStream<S>, PartitionMStream<Exclude<T, S>>]
+  partition(
+    predicate: (item: T, index: number) => boolean | Promise<boolean>,
+  ): [PartitionMStream<T>, PartitionMStream<T>]
+  partition(
+    predicate: (item: T, index: number) => boolean | Promise<boolean>,
+  ): [PartitionMStream<T>, PartitionMStream<T>] {
+    const sources = partition(this, predicate)
+    return [new PartitionMStream(sources[0]), new PartitionMStream(sources[1])]
+  }
+
   async reduce<U = T>(
     accumulator: (previousValue: U, currentValue: T, currentIndex: number) => U | Promise<U>,
     initialValue?: U,
@@ -361,6 +375,10 @@ export class MapMStream<T> extends MStream<T> {
 
 export class OfMStream<T> extends MStream<T> {
   [Symbol.toStringTag] = 'OfMStream'
+}
+
+export class PartitionMStream<T> extends MStream<T> {
+  [Symbol.toStringTag] = 'PartitionMStream'
 }
 
 export class SkipMStream<T> extends MStream<T> {
