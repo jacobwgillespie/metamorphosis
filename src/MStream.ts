@@ -1,3 +1,4 @@
+import {catchWith} from './internal/catchWith'
 import {concat} from './internal/concat'
 import {concatAll} from './internal/concatAll'
 import {delay} from './internal/delay'
@@ -127,6 +128,12 @@ export class MStream<T> implements AsyncIterable<T> {
         }
       }
     }
+  }
+
+  catchWith(
+    handler: (err: any) => AsyncIterable<T> | Promise<AsyncIterable<T>>,
+  ): CatchWithMStream<T> {
+    return new CatchWithMStream(catchWith(this, handler))
   }
 
   concat(...sources: Array<AsyncIterable<T>>): ConcatMStream<T> {
@@ -306,6 +313,10 @@ export class MStream<T> implements AsyncIterable<T> {
 }
 
 // tslint:disable max-classes-per-file
+
+export class CatchWithMStream<T> extends MStream<T> {
+  [Symbol.toStringTag] = 'CatchWithMStream'
+}
 
 export class ConcatMStream<T> extends MStream<T> {
   [Symbol.toStringTag] = 'ConcatMStream'
