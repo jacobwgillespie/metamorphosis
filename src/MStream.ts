@@ -28,6 +28,9 @@ import {toArray} from './internal/toArray'
 import {RefCountedFuture} from './RefCountedFuture'
 import {Observer} from './types'
 import {of} from './internal/of'
+import {fromArray} from './internal/fromArray'
+import {fromPromise} from './internal/fromPromise'
+import {fromIterable} from './internal/fromIterable'
 
 export class MStream<T> implements AsyncIterable<T> {
   /** The number of consumers currently reading from this stream's shared iterator */
@@ -45,7 +48,21 @@ export class MStream<T> implements AsyncIterable<T> {
   /** The source async iterable's iterator, if this stream has been started */
   private _sourceIterator: AsyncIterator<T> | null = null
 
-  static of<T>(...items: T[]) {
+  static fromArray<T>(array: ArrayLike<T>): FromArrayMStream<T> {
+    return new FromArrayMStream(fromArray(array))
+  }
+
+  static fromIterable<T>(
+    iterable: Iterable<T | PromiseLike<T>> | AsyncIterable<T>,
+  ): FromIterableMStream<T> {
+    return new FromIterableMStream(fromIterable(iterable))
+  }
+
+  static fromPromise<T>(promise: PromiseLike<T>): FromPromiseMStream<T> {
+    return new FromPromiseMStream(fromPromise(promise))
+  }
+
+  static of<T>(...items: T[]): OfMStream<T> {
     return new OfMStream(of(...items))
   }
 
@@ -304,6 +321,18 @@ export class FlatMapMStream<T> extends MStream<T> {
 
 export class FinallyMStream<T> extends MStream<T> {
   [Symbol.toStringTag] = 'FinallyMStream'
+}
+
+export class FromArrayMStream<T> extends MStream<T> {
+  [Symbol.toStringTag] = 'FromArrayMStream'
+}
+
+export class FromIterableMStream<T> extends MStream<T> {
+  [Symbol.toStringTag] = 'FromIterableMStream'
+}
+
+export class FromPromiseMStream<T> extends MStream<T> {
+  [Symbol.toStringTag] = 'FromPromiseMStream'
 }
 
 export class MapMStream<T> extends MStream<T> {
