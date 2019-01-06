@@ -18,6 +18,7 @@ import {last} from './internal/last'
 import {map} from './internal/map'
 import {of} from './internal/of'
 import {reduce} from './internal/reduce'
+import {scan} from './internal/scan'
 import {skip} from './internal/skip'
 import {skipLast} from './internal/skipLast'
 import {skipWhile} from './internal/skipWhile'
@@ -236,6 +237,17 @@ export class MStream<T> implements AsyncIterable<T> {
     return reduce(this, accumulator, ...initialValue)
   }
 
+  scan<U = T>(
+    accumulator: (previousValue: U, currentValue: T, currentIndex: number) => U | Promise<U>,
+    initialValue?: U,
+  ): ScanMStream<U>
+  scan<U = T>(
+    accumulator: (previousValue: U, currentValue: T, currentIndex: number) => U | Promise<U>,
+    ...initialValue: U[]
+  ): ScanMStream<U> {
+    return new ScanMStream(scan(this, accumulator, ...initialValue))
+  }
+
   skip(count: number): SkipMStream<T> {
     return new SkipMStream(skip(this, count))
   }
@@ -351,6 +363,10 @@ export class SkipLastMStream<T> extends MStream<T> {
 
 export class SkipWhileMStream<T> extends MStream<T> {
   [Symbol.toStringTag] = 'SkipWhileMStream'
+}
+
+export class ScanMStream<T> extends MStream<T> {
+  [Symbol.toStringTag] = 'ScanMStream'
 }
 
 export class TakeMStream<T> extends MStream<T> {
