@@ -14,7 +14,7 @@ export async function find<T>(
 ): Promise<T | undefined> {
   let i = 0
 
-  for await (let item of source) {
+  for await (const item of source) {
     if (await predicate(item, i++)) {
       return item
     }

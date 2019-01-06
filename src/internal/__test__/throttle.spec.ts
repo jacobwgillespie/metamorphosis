@@ -1,6 +1,6 @@
+import {sleep} from '../_utils'
 import {throttle} from '../throttle'
 import {toArray} from '../toArray'
-import {sleep} from '../_utils'
 
 test('throttle', async () => {
   const source = (async function*() {

@@ -13,13 +13,13 @@ export async function last<T>(
   predicate: (value: T, index: number) => boolean | Promise<boolean> = async () => true,
 ): Promise<T | undefined> {
   let i = 0
-  let last: T | undefined
+  let lastItem: T | undefined
 
-  for await (let item of source) {
+  for await (const item of source) {
     if (await predicate(item, i++)) {
-      last = item
+      lastItem = item
     }
   }
 
-  return last
+  return lastItem
 }

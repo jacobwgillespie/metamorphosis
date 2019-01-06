@@ -1,6 +1,6 @@
+import {sleep} from '../_utils'
 import {timeout} from '../timeout'
 import {toArray} from '../toArray'
-import {sleep} from '../_utils'
 
 test('timeout', async () => {
   const source = (async function*() {

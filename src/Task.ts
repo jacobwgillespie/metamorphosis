@@ -24,13 +24,13 @@ function identity<T>(val: T) {
 }
 
 export class Task<T> implements Promise<T> {
-  // private _executor: AsyncIterable<T>
+  [Symbol.toStringTag] = 'Task'
+
   private _executorIterator: AsyncIterator<T>
   private _future: Future<T>
   private _done = false
 
   constructor(executor: AsyncIterable<T>) {
-    // this._executor = executor
     this._executorIterator = executor[Symbol.asyncIterator]()
     this._future = new Future()
   }
@@ -94,6 +94,4 @@ export class Task<T> implements Promise<T> {
     }
     this._future.failure(new Error('cancelled'))
   }
-
-  [Symbol.toStringTag] = 'Task'
 }

@@ -4,7 +4,7 @@ export async function* map<T, TResult>(
 ) {
   let i = 0
   for await (const item of source) {
-    const result = await selector(item, i)
+    const result = await selector(item, i++)
     yield result
   }
 }

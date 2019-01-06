@@ -1,5 +1,5 @@
-import {toArray} from '../toArray'
 import {fromIterable} from '../fromIterable'
+import {toArray} from '../toArray'
 
 test('fromIterable', async () => {
   const source = function*() {

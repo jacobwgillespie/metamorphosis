@@ -1,9 +1,11 @@
 import {Future} from './Future'
 
-const voidFn = () => {}
+const voidFn = () => {
+  // do nothing
+}
 
 export class RefCountedFuture<T> extends Future<T> {
-  private _refs: Future<void>[] = []
+  private _refs: Array<Future<void>> = []
 
   complete(valueOrError: T | Error) {
     super.complete(valueOrError)

@@ -1,12 +1,6 @@
 export async function reduce<T, U = T>(
   source: AsyncIterable<T>,
   accumulator: (previousValue: U, currentValue: T, currentIndex: number) => U | Promise<U>,
-  initialValue?: never[],
-): Promise<U>
-
-export async function reduce<T, U = T>(
-  source: AsyncIterable<T>,
-  accumulator: (previousValue: U, currentValue: T, currentIndex: number) => U | Promise<U>,
   initialValue?: U,
 ): Promise<U>
 
@@ -19,7 +13,7 @@ export async function reduce<T, U = T>(
   let hasPreviousValue = initialValue.length === 1
   let value = initialValue[0] as T | U
 
-  for await (let item of source) {
+  for await (const item of source) {
     if (hasPreviousValue) {
       value = await accumulator(value as U, item, i++)
     } else {

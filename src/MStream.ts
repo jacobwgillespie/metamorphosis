@@ -11,8 +11,12 @@ import {find} from './internal/find'
 import {findIndex} from './internal/findIndex'
 import {first} from './internal/first'
 import {flatMap} from './internal/flatMap'
+import {fromArray} from './internal/fromArray'
+import {fromIterable} from './internal/fromIterable'
+import {fromPromise} from './internal/fromPromise'
 import {last} from './internal/last'
 import {map} from './internal/map'
+import {of} from './internal/of'
 import {reduce} from './internal/reduce'
 import {skip} from './internal/skip'
 import {skipLast} from './internal/skipLast'
@@ -27,27 +31,8 @@ import {timeout} from './internal/timeout'
 import {toArray} from './internal/toArray'
 import {RefCountedFuture} from './RefCountedFuture'
 import {Observer} from './types'
-import {of} from './internal/of'
-import {fromArray} from './internal/fromArray'
-import {fromPromise} from './internal/fromPromise'
-import {fromIterable} from './internal/fromIterable'
 
 export class MStream<T> implements AsyncIterable<T> {
-  /** The number of consumers currently reading from this stream's shared iterator */
-  private _consumerCount = 0
-
-  /** Represents a future item to omit from this stream */
-  private _itemFuture: RefCountedFuture<T>
-
-  /** The Symbol ID of the shared iterator's lead consumer */
-  private _leadConsumer: Symbol | null = null
-
-  /** The source async iterable */
-  private _source: AsyncIterable<T>
-
-  /** The source async iterable's iterator, if this stream has been started */
-  private _sourceIterator: AsyncIterator<T> | null = null
-
   static fromArray<T>(array: ArrayLike<T>): FromArrayMStream<T> {
     return new FromArrayMStream(fromArray(array))
   }
@@ -65,6 +50,23 @@ export class MStream<T> implements AsyncIterable<T> {
   static of<T>(...items: T[]): OfMStream<T> {
     return new OfMStream(of(...items))
   }
+
+  [Symbol.toStringTag] = 'MStream'
+
+  /** The number of consumers currently reading from this stream's shared iterator */
+  private _consumerCount = 0
+
+  /** Represents a future item to omit from this stream */
+  private _itemFuture: RefCountedFuture<T>
+
+  /** The Symbol ID of the shared iterator's lead consumer */
+  private _leadConsumer: symbol | null = null
+
+  /** The source async iterable */
+  private _source: AsyncIterable<T>
+
+  /** The source async iterable's iterator, if this stream has been started */
+  private _sourceIterator: AsyncIterator<T> | null = null
 
   constructor(source: AsyncIterable<T>) {
     this._source = source
@@ -123,7 +125,7 @@ export class MStream<T> implements AsyncIterable<T> {
     }
   }
 
-  concat(...sources: AsyncIterable<T>[]): ConcatMStream<T> {
+  concat(...sources: Array<AsyncIterable<T>>): ConcatMStream<T> {
     return new ConcatMStream(concat([this, ...sources]))
   }
 
@@ -225,10 +227,6 @@ export class MStream<T> implements AsyncIterable<T> {
 
   async reduce<U = T>(
     accumulator: (previousValue: U, currentValue: T, currentIndex: number) => U | Promise<U>,
-    initialValue?: never[],
-  ): Promise<U>
-  async reduce<U = T>(
-    accumulator: (previousValue: U, currentValue: T, currentIndex: number) => U | Promise<U>,
     initialValue?: U,
   ): Promise<U>
   async reduce<U = T>(
@@ -287,9 +285,9 @@ export class MStream<T> implements AsyncIterable<T> {
   async toArray(): Promise<T[]> {
     return toArray(this)
   }
-
-  [Symbol.toStringTag] = 'MStream'
 }
+
+// tslint:disable max-classes-per-file
 
 export class ConcatMStream<T> extends MStream<T> {
   [Symbol.toStringTag] = 'ConcatMStream'

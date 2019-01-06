@@ -1,5 +1,5 @@
-import {sleep} from './_utils'
 import {TimeoutError} from '../errors'
+import {sleep} from './_utils'
 
 type TimeoutResult<TSource> = [false, IteratorResult<TSource>] | [true]
 
@@ -8,7 +8,7 @@ export async function* timeout<T>(source: AsyncIterable<T>, time: number) {
 
   while (true) {
     const [err, item] = await Promise.race([
-      it.next().then(item => [false, item] as TimeoutResult<T>),
+      it.next().then(i => [false, i] as TimeoutResult<T>),
       sleep(time).then(() => [true] as TimeoutResult<T>),
     ])
 

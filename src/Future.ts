@@ -9,7 +9,7 @@ interface FuturePromiseFulfill<T> {
 interface FuturePromise<T> extends Promise<T>, FuturePromiseFulfill<T> {}
 
 function buildFuturePromise<T>(): FuturePromise<T> {
-  const it = {} as FuturePromiseFulfill<T>
+  const it = ({} as unknown) as FuturePromiseFulfill<T>
   const futurePromise = new Promise<T>((resolve, reject) => {
     it.resolve = resolve
     it.reject = reject
@@ -20,6 +20,8 @@ function buildFuturePromise<T>(): FuturePromise<T> {
 }
 
 export class Future<T> implements Promise<T> {
+  [Symbol.toStringTag] = 'Future'
+
   private _completed = false
   private _promise: FuturePromise<T>
 
@@ -112,6 +114,4 @@ export class Future<T> implements Promise<T> {
 
     this._promise.resolve(value)
   }
-
-  [Symbol.toStringTag] = 'Future'
 }

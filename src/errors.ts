@@ -1,3 +1,5 @@
+// tslint:disable max-classes-per-file
+
 export class MetamorphosisError extends Error {
   constructor(message: string = '') {
     super(message)

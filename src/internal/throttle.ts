@@ -1,5 +1,6 @@
 export async function* throttle<T>(source: AsyncIterable<T>, time: number) {
-  let currentTime, previousTime
+  let currentTime
+  let previousTime
 
   for await (const item of source) {
     currentTime = Date.now()
