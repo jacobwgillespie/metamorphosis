@@ -1,11 +1,19 @@
+import {concat} from './internal/concat'
+import {concatAll} from './internal/concatAll'
 import {delay} from './internal/delay'
+import {delayEach} from './internal/delayEach'
+import {elementAt} from './internal/elementAt'
 import {endWith} from './internal/endWith'
 import {every} from './internal/every'
 import {filter} from './internal/filter'
 import {finallyDo} from './internal/finally'
+import {find} from './internal/find'
+import {findIndex} from './internal/findIndex'
+import {first} from './internal/first'
 import {flatMap} from './internal/flatMap'
 import {last} from './internal/last'
 import {map} from './internal/map'
+import {reduce} from './internal/reduce'
 import {skip} from './internal/skip'
 import {skipLast} from './internal/skipLast'
 import {skipWhile} from './internal/skipWhile'
@@ -93,8 +101,24 @@ export class MStream<T> implements AsyncIterable<T> {
     }
   }
 
+  concat(...sources: AsyncIterable<T>[]): ConcatMStream<T> {
+    return new ConcatMStream(concat([this, ...sources]))
+  }
+
+  concatAll(this: MStream<AsyncIterable<T>>) {
+    return new ConcatAllMStream(concatAll(this))
+  }
+
   delay(delayMs: number): DelayMStream<T> {
     return new DelayMStream(delay(this, delayMs))
+  }
+
+  delayEach(delayMs: number): DelayEachMStream<T> {
+    return new DelayEachMStream(delayEach(this, delayMs))
+  }
+
+  elementAt(index: number): Promise<T | undefined> {
+    return elementAt(this, index)
   }
 
   endWith(...items: T[]): EndWithMStream<T> {
@@ -117,6 +141,36 @@ export class MStream<T> implements AsyncIterable<T> {
 
   finally(action: () => void | Promise<void>): FinallyMStream<T> {
     return new FinallyMStream(finallyDo(this, action))
+  }
+
+  async find<S extends T>(
+    predicate: (value: T, index: number) => value is S,
+  ): Promise<S | undefined>
+  async find(
+    predicate: (value: T, index: number) => boolean | Promise<boolean>,
+  ): Promise<T | undefined>
+  async find(
+    predicate: (value: T, index: number) => boolean | Promise<boolean>,
+  ): Promise<T | undefined> {
+    return find(this, predicate)
+  }
+
+  async findIndex(
+    predicate: (value: T, index: number) => boolean | Promise<boolean>,
+  ): Promise<number> {
+    return findIndex(this, predicate)
+  }
+
+  async first<S extends T>(
+    predicate: (value: T, index: number) => value is S,
+  ): Promise<S | undefined>
+  async first(
+    predicate?: (value: T, index: number) => boolean | Promise<boolean>,
+  ): Promise<T | undefined>
+  async first(
+    predicate?: (value: T, index: number) => boolean | Promise<boolean>,
+  ): Promise<T | undefined> {
+    return first(this, predicate)
   }
 
   flatMap<TResult>(
@@ -145,6 +199,21 @@ export class MStream<T> implements AsyncIterable<T> {
     selector: (value: T, index: number) => Promise<TResult> | TResult,
   ): MapMStream<TResult> {
     return new MapMStream(map(this, selector))
+  }
+
+  async reduce<U = T>(
+    accumulator: (previousValue: U, currentValue: T, currentIndex: number) => U | Promise<U>,
+    initialValue?: never[],
+  ): Promise<U>
+  async reduce<U = T>(
+    accumulator: (previousValue: U, currentValue: T, currentIndex: number) => U | Promise<U>,
+    initialValue?: U,
+  ): Promise<U>
+  async reduce<U = T>(
+    accumulator: (previousValue: U, currentValue: T, currentIndex: number) => U | Promise<U>,
+    ...initialValue: U[]
+  ): Promise<U> {
+    return reduce(this, accumulator, ...initialValue)
   }
 
   skip(count: number): SkipMStream<T> {
@@ -200,8 +269,20 @@ export class MStream<T> implements AsyncIterable<T> {
   [Symbol.toStringTag] = 'MStream'
 }
 
+export class ConcatMStream<T> extends MStream<T> {
+  [Symbol.toStringTag] = 'ConcatMStream'
+}
+
+export class ConcatAllMStream<T> extends MStream<T> {
+  [Symbol.toStringTag] = 'ConcatAllMStream'
+}
+
 export class DelayMStream<T> extends MStream<T> {
   [Symbol.toStringTag] = 'DelayMStream'
+}
+
+export class DelayEachMStream<T> extends MStream<T> {
+  [Symbol.toStringTag] = 'DelayEachMStream'
 }
 
 export class EndWithMStream<T> extends MStream<T> {
