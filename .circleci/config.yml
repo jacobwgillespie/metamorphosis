@@ -13,21 +13,35 @@ jobs:
             - v1-dependencies-{{ checksum "package.json" }}-
             - v1-dependencies-
 
-      - run: yarn install
+      - run:
+          name: Install dependencies
+          command: yarn install
 
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}-{{ checksum "yarn.lock" }}
 
-      - run: yarn type-check
+      - run:
+          name: Type check code
+          command: yarn type-check
 
-      - run: yarn lint
+      - run:
+          name: Lint code
+          command: yarn lint
 
-      - run: yarn test -c 2
+      - run:
+          name: Run tests
+          command: yarn test -w 2
 
-      - run: yarn build
+      - run:
+          name: Run build
+          command: yarn build
 
-      - run: yarn coverage -c 2
+      - run:
+          name: Generate code coverage
+          command: yarn coverage -w 2
 
-      - run: bash <(curl -s https://codecov.io/bash)
+      - run:
+          name: Upload code coverage
+          command: bash <(curl -s https://codecov.io/bash)
