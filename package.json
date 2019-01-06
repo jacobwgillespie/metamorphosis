@@ -22,6 +22,7 @@
   "scripts": {
     "build": "bili",
     "coverage": "jest --config jest.coverage.config.js --coverage",
+    "lint": "tslint -p . -t stylish",
     "test": "jest",
     "type-check": "tsc",
     "watch": "bili --watch"
@@ -36,7 +37,10 @@
     "rollup": "^1.0.0",
     "rollup-plugin-typescript2": "^0.18.1",
     "ts-jest": "^23.10.5",
-    "typescript": "^3.2.2"
+    "tslint": "^5.12.0",
+    "tslint-config-prettier": "^1.17.0",
+    "typescript": "^3.2.2",
+    "typescript-tslint-plugin": "^0.2.1"
   },
   "bili": {
     "input": [
