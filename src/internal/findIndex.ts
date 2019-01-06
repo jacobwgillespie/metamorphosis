@@ -5,9 +5,11 @@ export async function findIndex<T>(
   let i = 0
 
   for await (const item of source) {
-    if (await predicate(item, i++)) {
+    if (await predicate(item, i)) {
       return i
     }
+
+    i += 1
   }
 
   return -1
