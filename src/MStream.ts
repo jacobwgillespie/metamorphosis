@@ -153,11 +153,9 @@ export class MStream<T> implements AsyncIterable<T> {
     return new EndWithMStream(endWith(this, ...items))
   }
 
-  async every<S extends T>(predicate: (value: T, index: number) => value is S): Promise<boolean>
-  async every(predicate: (value: T, index: number) => boolean | Promise<boolean>): Promise<boolean>
-  async every(
-    predicate: (value: T, index: number) => boolean | Promise<boolean>,
-  ): Promise<boolean> {
+  every<S extends T>(predicate: (value: T, index: number) => value is S): Promise<boolean>
+  every(predicate: (value: T, index: number) => boolean | Promise<boolean>): Promise<boolean>
+  every(predicate: (value: T, index: number) => boolean | Promise<boolean>): Promise<boolean> {
     return every(this, predicate)
   }
 
@@ -171,31 +169,19 @@ export class MStream<T> implements AsyncIterable<T> {
     return new FinallyMStream(finallyFn(this, action))
   }
 
-  async find<S extends T>(
-    predicate: (value: T, index: number) => value is S,
-  ): Promise<S | undefined>
-  async find(
-    predicate: (value: T, index: number) => boolean | Promise<boolean>,
-  ): Promise<T | undefined>
-  async find(
-    predicate: (value: T, index: number) => boolean | Promise<boolean>,
-  ): Promise<T | undefined> {
+  find<S extends T>(predicate: (value: T, index: number) => value is S): Promise<S | undefined>
+  find(predicate: (value: T, index: number) => boolean | Promise<boolean>): Promise<T | undefined>
+  find(predicate: (value: T, index: number) => boolean | Promise<boolean>): Promise<T | undefined> {
     return find(this, predicate)
   }
 
-  async findIndex(
-    predicate: (value: T, index: number) => boolean | Promise<boolean>,
-  ): Promise<number> {
+  findIndex(predicate: (value: T, index: number) => boolean | Promise<boolean>): Promise<number> {
     return findIndex(this, predicate)
   }
 
-  async first<S extends T>(
-    predicate: (value: T, index: number) => value is S,
-  ): Promise<S | undefined>
-  async first(
-    predicate?: (value: T, index: number) => boolean | Promise<boolean>,
-  ): Promise<T | undefined>
-  async first(
+  first<S extends T>(predicate: (value: T, index: number) => value is S): Promise<S | undefined>
+  first(predicate?: (value: T, index: number) => boolean | Promise<boolean>): Promise<T | undefined>
+  first(
     predicate?: (value: T, index: number) => boolean | Promise<boolean>,
   ): Promise<T | undefined> {
     return first(this, predicate)
@@ -211,13 +197,9 @@ export class MStream<T> implements AsyncIterable<T> {
     return this[Symbol.asyncIterator]()
   }
 
-  async last<S extends T>(
-    predicate: (value: T, index: number) => value is S,
-  ): Promise<S | undefined>
-  async last(
-    predicate?: (value: T, index: number) => boolean | Promise<boolean>,
-  ): Promise<T | undefined>
-  async last(
+  last<S extends T>(predicate: (value: T, index: number) => value is S): Promise<S | undefined>
+  last(predicate?: (value: T, index: number) => boolean | Promise<boolean>): Promise<T | undefined>
+  last(
     predicate: (value: T, index: number) => boolean | Promise<boolean> = async () => true,
   ): Promise<T | undefined> {
     return last(this, predicate)
@@ -242,11 +224,11 @@ export class MStream<T> implements AsyncIterable<T> {
     return [new PartitionMStream(sources[0]), new PartitionMStream(sources[1])]
   }
 
-  async reduce<U = T>(
+  reduce<U = T>(
     accumulator: (previousValue: U, currentValue: T, currentIndex: number) => U | Promise<U>,
     initialValue?: U,
   ): Promise<U>
-  async reduce<U = T>(
+  reduce<U = T>(
     accumulator: (previousValue: U, currentValue: T, currentIndex: number) => U | Promise<U>,
     ...initialValue: U[]
   ): Promise<U> {
@@ -278,9 +260,9 @@ export class MStream<T> implements AsyncIterable<T> {
     return new SkipWhileMStream(skipWhile(this, predicate))
   }
 
-  async some<S extends T>(predicate: (value: T, index: number) => value is S): Promise<boolean>
-  async some(predicate: (value: T, index: number) => boolean | Promise<boolean>): Promise<boolean>
-  async some(predicate: (value: T, index: number) => boolean | Promise<boolean>): Promise<boolean> {
+  some<S extends T>(predicate: (value: T, index: number) => value is S): Promise<boolean>
+  some(predicate: (value: T, index: number) => boolean | Promise<boolean>): Promise<boolean>
+  some(predicate: (value: T, index: number) => boolean | Promise<boolean>): Promise<boolean> {
     return some(this, predicate)
   }
 
@@ -318,7 +300,7 @@ export class MStream<T> implements AsyncIterable<T> {
     return new TimeoutMStream(timeout(this, time))
   }
 
-  async toArray(): Promise<T[]> {
+  toArray(): Promise<T[]> {
     return toArray(this)
   }
 }
