@@ -32,7 +32,9 @@ jobs:
 
       - run:
           name: Run tests
-          command: yarn test -w 2
+          command: yarn test -w 2 --ci --reporters=default --reporters=jest-junit
+          environment:
+            JEST_JUNIT_OUTPUT: reports/junit/js-test-results.xml
 
       - run:
           name: Run build
@@ -45,3 +47,12 @@ jobs:
       - run:
           name: Upload code coverage
           command: bash <(curl -s https://codecov.io/bash)
+
+      - store_test_results:
+          path: reports/junit
+
+      - store_artifacts:
+          path: reports/junit
+
+      - store_artifacts:
+          path: coverage

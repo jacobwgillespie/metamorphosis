@@ -33,6 +33,7 @@
     "@types/node": "^10.12.18",
     "bili": "^3.4.2",
     "jest": "^23.6.0",
+    "jest-junit": "^5.2.0",
     "prettier": "^1.15.3",
     "rollup": "^1.0.0",
     "rollup-plugin-typescript2": "^0.18.1",
