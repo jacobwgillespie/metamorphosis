@@ -21,6 +21,7 @@
   },
   "scripts": {
     "build": "bili",
+    "coverage": "jest --config jest.coverage.config.js --coverage",
     "test": "jest",
     "type-check": "tsc",
     "watch": "bili --watch"
@@ -30,6 +31,7 @@
     "@types/jest": "^23.3.11",
     "@types/node": "^10.12.18",
     "bili": "^3.4.2",
+    "codecov": "^3.1.0",
     "jest": "^23.6.0",
     "prettier": "^1.15.3",
     "rollup": "^1.0.0",

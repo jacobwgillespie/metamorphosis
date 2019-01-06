@@ -25,3 +25,7 @@ jobs:
       - run: yarn test
 
       - run: yarn build
+
+      - run: yarn coverage
+
+      - run: yarn codecov -f coverage/*.json
