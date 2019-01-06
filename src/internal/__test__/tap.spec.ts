@@ -1,6 +1,6 @@
+import {Observer} from '../../types'
 import {tap} from '../tap'
 import {toArray} from '../toArray'
-import {Observer} from '../../types'
 
 test('tap', async () => {
   const source = (async function*() {
