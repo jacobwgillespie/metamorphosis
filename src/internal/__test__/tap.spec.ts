@@ -1,4 +1,3 @@
-import {Observer} from '../../types'
 import {tap} from '../tap'
 import {toArray} from '../toArray'
 
@@ -41,23 +40,24 @@ test('tap', async () => {
     yield 1
     yield 2
     yield 3
+    return undefined
   })()
 
-  const emptyObserver = ({
-    get next() {
+  const emptyObserver = {
+    next() {
       return undefined
     },
-    get error() {
+    error() {
       return undefined
     },
-    get complete() {
+    complete() {
       return undefined
     },
-  } as unknown) as Observer<number>
+  }
 
-  const nextSpy = jest.spyOn(emptyObserver, 'next', 'get')
-  const errorSpy = jest.spyOn(emptyObserver, 'error', 'get')
-  const completeSpy = jest.spyOn(emptyObserver, 'complete', 'get')
+  const nextSpy = jest.spyOn(emptyObserver, 'next')
+  const errorSpy = jest.spyOn(emptyObserver, 'error')
+  const completeSpy = jest.spyOn(emptyObserver, 'complete')
 
   await toArray(tap(source2, emptyObserver))
 

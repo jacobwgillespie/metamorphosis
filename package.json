@@ -3,14 +3,14 @@
   "version": "0.1.0",
   "license": "MIT",
   "author": "Jacob Gillespie <jacobwgillespie@gmail.com>",
-  "main": "./dist/metamorphosis.cjs.js",
-  "module": "./dist/metamorphosis.es.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/es/index.js",
+  "types": "./dist/es/index.d.ts",
   "files": [
     "dist"
   ],
   "engines": {
-    "node": ">=10"
+    "node": ">=12"
   },
   "prettier": {
     "bracketSpacing": false,
@@ -20,38 +20,24 @@
     "trailingComma": "all"
   },
   "scripts": {
-    "build": "bili",
-    "coverage": "jest --config jest.coverage.config.js --coverage",
+    "build": "tsc && tsc -p tsconfig.cjs.json",
+    "coverage": "jest --coverage",
     "lint": "tslint -p . -t stylish",
     "test": "jest",
     "type-check": "tsc",
-    "watch": "bili --watch"
+    "watch": "tsc --watch"
   },
   "dependencies": {},
   "devDependencies": {
-    "@types/jest": "^23.3.11",
-    "@types/node": "^10.12.18",
-    "bili": "^3.4.2",
-    "jest": "^23.6.0",
-    "jest-junit": "^5.2.0",
-    "prettier": "^1.15.3",
-    "rollup": "^1.0.0",
-    "rollup-plugin-typescript2": "^0.18.1",
-    "ts-jest": "^23.10.5",
-    "tslint": "^5.12.0",
-    "tslint-config-prettier": "^1.17.0",
-    "typescript": "^3.2.2",
-    "typescript-tslint-plugin": "^0.2.1"
-  },
-  "bili": {
-    "input": [
-      "src/index.ts"
-    ],
-    "format": [
-      "cjs",
-      "es"
-    ],
-    "banner": true,
-    "target": "node:10"
+    "@types/jest": "^24.0.25",
+    "@types/node": "^13.1.2",
+    "jest": "^24.9.0",
+    "jest-junit": "^10.0.0",
+    "prettier": "^1.19.1",
+    "ts-jest": "^24.2.0",
+    "tslint": "^5.20.1",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.7.4",
+    "typescript-tslint-plugin": "^0.5.5"
   }
 }

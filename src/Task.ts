@@ -2,7 +2,7 @@ import {Future} from './Future'
 
 const neverPromise = new Promise<never>(() => undefined)
 
-async function runIteratorToPromise<T>(source: AsyncIterator<T>) {
+async function runIteratorToPromise<T>(source: AsyncIterator<T, T, T>) {
   let next = await source.next()
   let last
 
